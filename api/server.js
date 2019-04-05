@@ -12,4 +12,8 @@ server.use(express.json());
 
 configureRoutes(server);
 
+server.get('/', (req, res) => {
+    res.send('James Basile: Sprint Challenge- Authentication')
+})
+
 module.exports = server;
