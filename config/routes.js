@@ -29,6 +29,24 @@ function register(req, res) {
 
 function login(req, res) {
   // implement user login
+  const { username, password } = req.body;
+
+  db('users')
+    .where({ username })
+    .first()
+    .then(saved => {
+      if(saved && bcrypt.compareSync(password, saved.password)) {
+        const token = generateToken(saved)
+
+        res.status(200).json({
+          message: `Welcome ${saved.username}!`,
+          token,
+        })
+      } else {
+        res.status(400).json({ message: 'Invalid username or password'})
+      }
+    })
+    .catch(err => res.status(500).json(err));
 }
 
 function getJokes(req, res) {
@@ -44,4 +62,18 @@ function getJokes(req, res) {
     .catch(err => {
       res.status(500).json({ message: 'Error Fetching Jokes', error: err });
     });
+}
+
+
+
+function generateToken(user) {
+  const payload = {
+    subject: user.id,
+    username: user.username
+  }
+  const options = {
+    expiresIn: '1d'
+  }
+
+  return jwt.sign(payload, secret, options)
 }
